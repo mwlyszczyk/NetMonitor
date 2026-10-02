@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetMonitor.Api.Data;
 using NetMonitor.Api.Models;
+using NetMonitor.Api.Services;
 
 namespace NetMonitor.Api.Controllers;
 
@@ -16,7 +17,7 @@ public class MonitorsController : ControllerBase
         _context = context;
     }
 
-    // GET: api/monitors
+    // GET: api/monitors returns list of all monitor targets in the database
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MonitorTarget>>> GetMonitors()
     {
@@ -26,7 +27,7 @@ public class MonitorsController : ControllerBase
         return Ok(monitors);
     }
 
-    // GET: api/monitors/5
+    // GET: api/monitors/5 returns monitor target with the specified ID or 404 if not found
     [HttpGet("{id}")]
     public async Task<ActionResult<MonitorTarget>> GetMonitor(int id)
     {
@@ -41,7 +42,7 @@ public class MonitorsController : ControllerBase
         return Ok(monitor);
     }
 
-    // POST: api/monitors
+    // POST: api/monitors create new monitor target and return the created monitor target with its ID
     [HttpPost]
     public async Task<ActionResult<MonitorTarget>> CreateMonitor(
         MonitorTarget monitor)
@@ -59,16 +60,33 @@ public class MonitorsController : ControllerBase
             monitor);
     }
 
-    // PUT: api/monitors/5
+    // POST: api/monitors/5/check tests PingMonitorService
+    [HttpPost("{id}/check")]
+    public async Task<IActionResult> CheckMonitor(
+    int id,
+    [FromServices] PingMonitorService pingMonitorService)
+    {
+        var monitor = await _context.MonitorTargets.FindAsync(id);
+
+        if (monitor == null)
+        {
+            return NotFound();
+        }
+
+        await pingMonitorService.CheckMonitorAsync(id);
+
+        return Ok(new
+        {
+            message = "Monitor checked successfully."
+        });
+    }
+
+    // PUT: api/monitors/5 updates monitor target with the specified ID or 404 if not found
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateMonitor(
         int id,
         MonitorTarget monitor)
     {
-        if (id != monitor.Id)
-        {
-            return BadRequest();
-        }
 
         var existingMonitor = await _context.MonitorTargets
             .FindAsync(id);
@@ -88,7 +106,7 @@ public class MonitorsController : ControllerBase
         return NoContent();
     }
 
-    // DELETE: api/monitors/5
+    // DELETE: api/monitors/5 deletes monitor target with the specified ID or 404 if not found
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMonitor(int id)
     {
