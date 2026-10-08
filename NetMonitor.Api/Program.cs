@@ -14,8 +14,21 @@ builder.Services.AddDbContext<NetMonitorDbContext>(options =>
 builder.Services.AddScoped<PingMonitorService>();
 builder.Services.AddHostedService<MonitorBackgroundService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Angular", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 
 var app = builder.Build();
+
+app.UseCors("Angular");
 
 if (app.Environment.IsDevelopment())
 {

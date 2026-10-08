@@ -1,5 +1,16 @@
 services:
 
+  angular:
+    build:
+      context: ./netmonitor-ui
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./netmonitor-ui:/app
+      - /app/node_modules
+    depends_on:
+      - server
+
   server:
     build:
       context: .

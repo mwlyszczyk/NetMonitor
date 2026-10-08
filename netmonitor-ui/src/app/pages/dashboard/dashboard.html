@@ -1,0 +1,52 @@
+<div class="min-h-screen bg-gray-100 p-8">
+  <div class="mx-auto max-w-7xl">
+
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">
+        NetMonitor
+      </h1>
+
+      <p class="mt-1 text-gray-500">
+        Network monitoring dashboard
+      </p>
+    </header>
+
+    @if (loading()) {
+    <div class="rounded-xl bg-white p-8 text-center shadow-sm">
+      <p class="text-gray-500">
+        Loading monitors...
+      </p>
+    </div>
+    }
+
+    @if (error()) {
+    <div class="rounded-xl bg-red-50 p-4 text-red-700">
+      {{ error() }}
+    </div>
+    }
+
+    @if (!loading() && monitors().length === 0) {
+    <div class="rounded-xl bg-white p-8 text-center shadow-sm">
+      <h2 class="text-xl font-semibold text-gray-900">
+        No monitors found
+      </h2>
+
+      <p class="mt-2 text-gray-500">
+        Create a monitor to begin monitoring your network.
+      </p>
+    </div>
+    }
+
+    @if (!loading() && monitors().length > 0) {
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+      @for (monitor of monitors(); track monitor.id) {
+      <app-monitor-card [monitor]="monitor"
+                        [statistics]="getStatistics(monitor.id)" />
+      }
+
+    </div>
+    }
+
+  </div>
+</div>
