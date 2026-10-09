@@ -1,1 +1,155 @@
-<p>monitor-detail works!</p>
+<div class="min-h-screen bg-gray-100 p-6 md:p-8">
+  <div class="mx-auto max-w-7xl">
+
+    <a routerLink="/dashboard"
+       class="mb-6 inline-block text-sm font-medium text-blue-600 hover:text-blue-800">
+      ← Back to dashboard
+    </a>
+
+    @if (loading()) {
+    <div class="rounded-xl bg-white p-8 text-center shadow-sm">
+      Loading monitor...
+    </div>
+    }
+
+    @if (error()) {
+    <div class="rounded-xl bg-red-50 p-4 text-red-700">
+      {{ error() }}
+    </div>
+    }
+
+    @if (monitor(); as currentMonitor) {
+    <header class="mb-8 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">
+          {{ currentMonitor.name }}
+        </h1>
+        <p class="mt-1 text-gray-500">
+          {{ currentMonitor.host }} · {{ currentMonitor.type }}
+        </p>
+      </div>
+
+      @if (statistics(); as stats) {
+      @if (stats.lastStatus === 'Online') {
+      <span class="rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
+        ● Online
+      </span>
+      } @else if (stats.lastStatus === 'Offline') {
+      <span class="rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-700">
+        ● Offline
+      </span>
+      } @else {
+      <span class="rounded-full bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700">
+        Unknown
+      </span>
+      }
+      }
+    </header>
+
+    @if (statistics(); as stats) {
+    <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-xl bg-white p-6 shadow-sm">
+        <p class="text-sm text-gray-500">Uptime</p>
+        <p class="mt-2 text-3xl font-bold text-gray-900">
+          {{ stats.uptimePercentage }}%
+        </p>
+      </div>
+
+      <div class="rounded-xl bg-white p-6 shadow-sm">
+        <p class="text-sm text-gray-500">Average response</p>
+        <p class="mt-2 text-3xl font-bold text-gray-900">
+          {{ stats.averageResponseTimeMs }} ms
+        </p>
+      </div>
+
+      <div class="rounded-xl bg-white p-6 shadow-sm">
+        <p class="text-sm text-gray-500">Successful checks</p>
+        <p class="mt-2 text-3xl font-bold text-green-600">
+          {{ stats.successfulChecks }}
+        </p>
+      </div>
+
+      <div class="rounded-xl bg-white p-6 shadow-sm">
+        <p class="text-sm text-gray-500">Failed checks</p>
+        <p class="mt-2 text-3xl font-bold text-red-600">
+          {{ stats.failedChecks }}
+        </p>
+      </div>
+    </div>
+    }
+
+    <section class="mb-8 rounded-xl bg-white p-6 shadow-sm">
+      <h2 class="mb-1 text-xl font-semibold text-gray-900">
+        Response time history
+      </h2>
+      <p class="mb-6 text-sm text-gray-500">
+        Response time for the latest {{ results().length }} checks
+      </p>
+
+      @if (results().length > 0) {
+      <div class="relative h-80 w-full">
+        <canvas baseChart
+                [type]="'line'"
+                [data]="chartData()"
+                [options]="chartOptions"></canvas>
+      </div>
+      } @else {
+      <p class="py-12 text-center text-gray-500">
+        No check history is available yet.
+      </p>
+      }
+    </section>
+
+    <section class="rounded-xl bg-white p-6 shadow-sm">
+      <h2 class="mb-4 text-xl font-semibold text-gray-900">
+        Recent checks
+      </h2>
+
+      @if (results().length > 0) {
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b border-gray-200 text-gray-500">
+              <th class="px-3 py-3 font-medium">Checked at</th>
+              <th class="px-3 py-3 font-medium">Status</th>
+              <th class="px-3 py-3 font-medium">Response time</th>
+              <th class="px-3 py-3 font-medium">Error</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (result of results(); track result.id) {
+            <tr class="border-b border-gray-100 last:border-0">
+              <td class="whitespace-nowrap px-3 py-3 text-gray-600">
+                {{ result.checkedAt | date:'medium' }}
+              </td>
+
+              <td class="px-3 py-3">
+                @if (result.isSuccess) {
+                <span class="font-medium text-green-600">Online</span>
+                } @else {
+                <span class="font-medium text-red-600">Offline</span>
+                }
+              </td>
+
+              <td class="whitespace-nowrap px-3 py-3 text-gray-900">
+                {{ result.responseTimeMs }} ms
+              </td>
+
+              <td class="px-3 py-3 text-gray-500">
+                {{ result.errorMessage || '—' }}
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      } @else {
+      <p class="py-8 text-center text-gray-500">
+        No check results have been recorded yet.
+      </p>
+      }
+    </section>
+    }
+  </div>
+</div>

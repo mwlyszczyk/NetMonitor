@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { Monitor } from '../../models/monitor';
@@ -8,7 +8,8 @@ import { MonitorStatistics } from '../../models/monitor-statistics';
   selector: 'app-monitor-card',
   imports: [RouterLink],
   templateUrl: './monitor-card.html',
-  styleUrl: './monitor-card.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './monitor-card.css',
 })
 export class MonitorCard {
   @Input({ required: true }) monitor!: Monitor;
